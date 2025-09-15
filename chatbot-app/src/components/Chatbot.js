@@ -52,10 +52,60 @@ const parseMarkdown = (text) => {
   return parsed;
 };
 
-// 포맷팅된 텍스트를 렌더링하는 컴포넌트
-const FormattedText = ({ text }) => {
-  const formattedText = parseMarkdown(text);
+// 타이핑 애니메이션 컴포넌트 (간소화된 버전)
+const TypewriterText = ({ text, speed = 50, onComplete }) => {
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    if (!text) return;
+    
+    if (currentIndex < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText(text.slice(0, currentIndex + 1));
+        setCurrentIndex(prev => prev + 1);
+      }, speed);
+
+      return () => clearTimeout(timer);
+    } else if (isTyping) {
+      setIsTyping(false);
+      onComplete?.();
+    }
+  }, [currentIndex, text, speed, isTyping, onComplete]);
+
+  // 타이핑이 완료되면 마크다운 파싱된 텍스트를 보여줌
+  if (!isTyping) {
+    const parsedHTML = parseMarkdown(text);
+    return <div dangerouslySetInnerHTML={{ __html: parsedHTML }} />;
+  }
+
+  return (
+    <div>
+      {displayedText}
+      {isTyping && (
+        <span
+          style={{
+            display: 'inline-block',
+            width: '2px',
+            height: '1em',
+            backgroundColor: 'currentColor',
+            marginLeft: '2px',
+            animation: 'blink 1s infinite'
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// 포맷팅된 텍스트를 렌더링하는 컴포넌트 (타이핑 효과 없는 버전)
+const FormattedText = ({ text, typing = false, onTypingComplete }) => {
+  if (typing) {
+    return <TypewriterText text={text} onComplete={onTypingComplete} />;
+  }
   
+  const formattedText = parseMarkdown(text);
   return (
     <div dangerouslySetInnerHTML={{ __html: formattedText }} />
   );
@@ -71,6 +121,12 @@ const ChatContainer = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  
+  /* 커서 깜빡임 애니메이션 */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
 `;
 
 const Header = styled.div`
@@ -298,7 +354,9 @@ const Chatbot = () => {
       id: 1,
       text: "Hello! I'm your Uniden product support assistant. Feel free to ask me anything about our products. For example, you can ask about 'camera installation' or 'product information'.",
       isUser: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      typing: false,
+      isComplete: true
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -365,7 +423,9 @@ const Chatbot = () => {
         id: Date.now() + 1,
         text: response.data.answer,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        typing: true,
+        isComplete: false
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -375,7 +435,9 @@ const Chatbot = () => {
         id: Date.now() + 1,
         text: "Sorry, I'm unable to connect to the server at the moment. Please try again later.",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        typing: true,
+        isComplete: false
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -390,6 +452,16 @@ const Chatbot = () => {
     }
   };
 
+  const handleTypingComplete = (messageId) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, typing: false, isComplete: true }
+          : msg
+      )
+    );
+  };
+
   const startNewChat = () => {
     // 쿠키에서 thread_id 삭제
     deleteCookie('uniden_chatbot_thread_id');
@@ -401,7 +473,9 @@ const Chatbot = () => {
         id: 1,
         text: "Hello! I'm your Uniden product support assistant. Feel free to ask me anything about our products. For example, you can ask about 'camera installation' or 'product information'.",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        typing: false,
+        isComplete: true
       }
     ]);
   };
@@ -423,7 +497,11 @@ const Chatbot = () => {
               {message.isUser ? <User size={20} /> : <Bot size={20} />}
             </MessageAvatar>
             <MessageContent isUser={message.isUser}>
-              <FormattedText text={message.text} />
+              <FormattedText 
+                text={message.text} 
+                typing={message.typing && !message.isUser}
+                onTypingComplete={() => handleTypingComplete(message.id)}
+              />
             </MessageContent>
           </Message>
         ))}
