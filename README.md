@@ -1,14 +1,20 @@
 # Uniden Chatbot
 
-AI-powered Uniden product support chatbot built with React. The built JS files can be used directly in HTML.
+AI-powered Uniden product support chatbot built with React. Features markdown text formatting, responsive design, and can be embedded in any website.
+
+## 🌐 Live Demo
+
+Visit the live demo: [https://your-vercel-url.vercel.app](https://your-vercel-url.vercel.app)
 
 ## 🚀 Features
 
 - **AI-powered responses**: Accurate product information via Uniden API
+- **Markdown formatting**: **Bold text**, *italic text*, and `code blocks` support
 - **Modern UI/UX**: Gradient and glassmorphism design
 - **Real-time chat**: Smooth animations and loading states
 - **Reference documents**: Related documents and confidence scores with answers
 - **Responsive design**: Support for both mobile and desktop
+- **Easy embedding**: Can be added to any website with simple script tags
 
 ## 📁 Project Structure
 
@@ -17,15 +23,17 @@ uniden-chatbot/
 ├── chatbot-app/           # React project
 │   ├── src/
 │   │   ├── components/
-│   │   │   └── Chatbot.js # Main chatbot component
+│   │   │   ├── Chatbot.js       # Main chatbot component
+│   │   │   └── FloatingChatbot.js # Floating widget component
 │   │   ├── App.js         # App entry point
-│   │   └── App.css        # Styles
-│   └── build/             # Built files
+│   │   └── index.js       # Entry point with widget functionality
+│   └── build/             # Built files (auto-generated)
 │       └── static/
 │           ├── js/        # JavaScript files
 │           └── css/       # CSS files
-├── test.html              # Detailed test page
-├── simple-test.html       # Simple test page
+├── index.html             # Main demo page (for Vercel deployment)
+├── test.html              # Local test page
+├── vercel.json            # Vercel deployment configuration
 └── README.md              # This file
 ```
 
@@ -94,19 +102,32 @@ curl -X POST https://innovate.aiims.com.au/api/query \
 
 ## 🚀 Deployment
 
-Upload the built files to a web server and modify the paths in the HTML files.
+### Vercel Deployment (Recommended)
 
-### CDN Usage Example
+1. Connect your GitHub repository to Vercel
+2. Vercel will automatically detect the `vercel.json` configuration
+3. The site will be deployed with `index.html` as the main page
+4. All chatbot assets will be properly served
+
+### Manual Deployment
+
+Upload the following files to your web server:
+- `index.html` (main page)
+- `chatbot-app/build/` (entire directory)
+
+### Embed in External Website
 
 ```html
 <!-- React CDN -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-<!-- Built files -->
-<link rel="stylesheet" href="https://your-cdn.com/static/css/main.1b95f591.css">
-<script src="https://your-cdn.com/static/js/453.8f92d47a.chunk.js"></script>
-<script src="https://your-cdn.com/static/js/main.0db3fc22.js"></script>
+<!-- Chatbot files from your deployment -->
+<link rel="stylesheet" href="https://your-site.vercel.app/chatbot-app/build/static/css/main.f815b5d0.css">
+<script src="https://your-site.vercel.app/chatbot-app/build/static/js/453.8f92d47a.chunk.js"></script>
+<script src="https://your-site.vercel.app/chatbot-app/build/static/js/main.e38298e1.js"></script>
+
+<!-- The chatbot will automatically appear in the bottom-right corner -->
 ```
 
 ## 🔍 Usage Examples
