@@ -53,7 +53,7 @@ const parseMarkdown = (text) => {
 };
 
 // 타이핑 애니메이션 컴포넌트 (HTML 기반)
-const TypewriterText = ({ text, speed = 30, onComplete }) => {
+const TypewriterText = ({ text, speed = 20, onComplete, onUpdate }) => {
   const [displayedHTML, setDisplayedHTML] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -119,6 +119,9 @@ const TypewriterText = ({ text, speed = 30, onComplete }) => {
         const html = buildHTML(currentNodes);
         setDisplayedHTML(html);
         setCurrentIndex(prev => prev + 1);
+        
+        // 타이핑 중 스크롤 업데이트 콜백 호출
+        onUpdate?.();
       }, speed);
 
       return () => clearTimeout(timer);
@@ -126,7 +129,7 @@ const TypewriterText = ({ text, speed = 30, onComplete }) => {
       setIsTyping(false);
       onComplete?.();
     }
-  }, [currentIndex, textNodes, speed, isTyping, onComplete]);
+  }, [currentIndex, textNodes, speed, isTyping, onComplete, onUpdate]);
 
   const buildHTML = (nodes) => {
     if (nodes.length === 0) return '';
@@ -200,9 +203,9 @@ const TypewriterText = ({ text, speed = 30, onComplete }) => {
 };
 
 // 포맷팅된 텍스트를 렌더링하는 컴포넌트 (타이핑 효과 없는 버전)
-const FormattedText = ({ text, typing = false, onTypingComplete }) => {
+const FormattedText = ({ text, typing = false, onTypingComplete, onTypingUpdate }) => {
   if (typing) {
-    return <TypewriterText text={text} onComplete={onTypingComplete} />;
+    return <TypewriterText text={text} onComplete={onTypingComplete} onUpdate={onTypingUpdate} />;
   }
   
   const formattedText = parseMarkdown(text);
@@ -463,6 +466,7 @@ const Chatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState('');
   const messagesEndRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
 
   // 컴포넌트 마운트 시 쿠키에서 thread_id 로드
   useEffect(() => {
@@ -479,6 +483,15 @@ const Chatbot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -562,6 +575,17 @@ const Chatbot = () => {
     );
   };
 
+  const handleTypingUpdate = () => {
+    // 타이핑 중에도 스크롤을 맨 아래로 이동 (throttled)
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    scrollTimeoutRef.current = setTimeout(() => {
+      scrollToBottom();
+    }, 50); // 50ms throttle
+  };
+
   const startNewChat = () => {
     // 쿠키에서 thread_id 삭제
     deleteCookie('uniden_chatbot_thread_id');
@@ -601,6 +625,7 @@ const Chatbot = () => {
                 text={message.text} 
                 typing={message.typing && !message.isUser}
                 onTypingComplete={() => handleTypingComplete(message.id)}
+                onTypingUpdate={handleTypingUpdate}
               />
             </MessageContent>
           </Message>
