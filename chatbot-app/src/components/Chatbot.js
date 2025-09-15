@@ -1,7 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, RotateCcw } from 'lucide-react';
 import axios from 'axios';
+
+// 쿠키 관리 유틸리티 함수들
+const setCookie = (name, value, days = 30) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+};
+
+const getCookie = (name) => {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
+const deleteCookie = (name) => {
+  document.cookie = `${name}=; Max-Age=-99999999; path=/`;
+};
 
 // 마크다운을 HTML로 변환하는 간단한 파서
 const parseMarkdown = (text) => {
@@ -57,6 +79,7 @@ const Header = styled.div`
   padding: 20px;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
 `;
 
 const Title = styled.h1`
@@ -71,6 +94,32 @@ const Subtitle = styled.p`
   color: rgba(255, 255, 255, 0.8);
   margin: 8px 0 0 0;
   font-size: 14px;
+`;
+
+const NewChatButton = styled.button`
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
 `;
 
 const MessagesContainer = styled.div`
@@ -254,7 +303,16 @@ const Chatbot = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [threadId, setThreadId] = useState('');
   const messagesEndRef = useRef(null);
+
+  // 컴포넌트 마운트 시 쿠키에서 thread_id 로드
+  useEffect(() => {
+    const savedThreadId = getCookie('uniden_chatbot_thread_id');
+    if (savedThreadId) {
+      setThreadId(savedThreadId);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -275,18 +333,33 @@ const Chatbot = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentQuery = inputValue;
     setInputValue('');
     setIsLoading(true);
 
     try {
-      const response = await axios.post('https://innovate.aiims.com.au/api/query', {
-        query: inputValue,
+      // API 요청 데이터 구성
+      const requestData = {
+        query: currentQuery,
         top_k: 3
-      }, {
+      };
+
+      // thread_id가 있으면 포함
+      if (threadId) {
+        requestData.thread_id = threadId;
+      }
+
+      const response = await axios.post('http://localhost:5001/api/query', requestData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
+
+      // 응답에서 thread_id를 받아서 상태와 쿠키에 저장
+      if (response.data.thread_id) {
+        setThreadId(response.data.thread_id);
+        setCookie('uniden_chatbot_thread_id', response.data.thread_id, 30);
+      }
 
       const botMessage = {
         id: Date.now() + 1,
@@ -317,9 +390,28 @@ const Chatbot = () => {
     }
   };
 
+  const startNewChat = () => {
+    // 쿠키에서 thread_id 삭제
+    deleteCookie('uniden_chatbot_thread_id');
+    setThreadId('');
+    
+    // 메시지 초기화
+    setMessages([
+      {
+        id: 1,
+        text: "Hello! I'm your Uniden product support assistant. Feel free to ask me anything about our products. For example, you can ask about 'camera installation' or 'product information'.",
+        isUser: false,
+        timestamp: new Date()
+      }
+    ]);
+  };
+
   return (
     <ChatContainer>
       <Header>
+        <NewChatButton onClick={startNewChat} title="Start new conversation">
+          <RotateCcw size={18} />
+        </NewChatButton>
         <Title>Uniden Assistant</Title>
         <Subtitle>AI-powered product support</Subtitle>
       </Header>
