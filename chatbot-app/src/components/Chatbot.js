@@ -52,18 +52,72 @@ const parseMarkdown = (text) => {
   return parsed;
 };
 
-// 타이핑 애니메이션 컴포넌트 (간소화된 버전)
-const TypewriterText = ({ text, speed = 50, onComplete }) => {
-  const [displayedText, setDisplayedText] = useState('');
+// 타이핑 애니메이션 컴포넌트 (HTML 기반)
+const TypewriterText = ({ text, speed = 30, onComplete }) => {
+  const [displayedHTML, setDisplayedHTML] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
+  const [textNodes, setTextNodes] = useState([]);
 
+  // 초기화: HTML을 파싱하여 텍스트 노드들 추출
   useEffect(() => {
     if (!text) return;
     
-    if (currentIndex < text.length) {
+    const parsedHTML = parseMarkdown(text);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = parsedHTML;
+    
+    const extractTextNodes = (element, path = []) => {
+      const nodes = [];
+      
+      for (let i = 0; i < element.childNodes.length; i++) {
+        const node = element.childNodes[i];
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+          // 텍스트 노드인 경우, 각 글자를 개별 노드로 분리
+          const textContent = node.textContent;
+          for (let j = 0; j < textContent.length; j++) {
+            nodes.push({
+              type: 'text',
+              char: textContent[j],
+              path: [...path],
+              elementTag: path.length > 0 ? path[path.length - 1] : null
+            });
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // 엘리먼트 노드인 경우, 재귀적으로 탐색
+          const elementInfo = {
+            tag: node.tagName.toLowerCase(),
+            attributes: {}
+          };
+          
+          // 속성 복사
+          for (let attr of node.attributes) {
+            elementInfo.attributes[attr.name] = attr.value;
+          }
+          
+          const childNodes = extractTextNodes(node, [...path, elementInfo]);
+          nodes.push(...childNodes);
+        }
+      }
+      
+      return nodes;
+    };
+    
+    const nodes = extractTextNodes(tempDiv);
+    setTextNodes(nodes);
+  }, [text]);
+
+  // 타이핑 애니메이션
+  useEffect(() => {
+    if (textNodes.length === 0) return;
+    
+    if (currentIndex < textNodes.length) {
       const timer = setTimeout(() => {
-        setDisplayedText(text.slice(0, currentIndex + 1));
+        // 현재까지의 노드들로 HTML 구성
+        const currentNodes = textNodes.slice(0, currentIndex + 1);
+        const html = buildHTML(currentNodes);
+        setDisplayedHTML(html);
         setCurrentIndex(prev => prev + 1);
       }, speed);
 
@@ -72,17 +126,63 @@ const TypewriterText = ({ text, speed = 50, onComplete }) => {
       setIsTyping(false);
       onComplete?.();
     }
-  }, [currentIndex, text, speed, isTyping, onComplete]);
+  }, [currentIndex, textNodes, speed, isTyping, onComplete]);
 
-  // 타이핑이 완료되면 마크다운 파싱된 텍스트를 보여줌
-  if (!isTyping) {
-    const parsedHTML = parseMarkdown(text);
-    return <div dangerouslySetInnerHTML={{ __html: parsedHTML }} />;
-  }
+  const buildHTML = (nodes) => {
+    if (nodes.length === 0) return '';
+    
+    let html = '';
+    let openTags = [];
+    
+    nodes.forEach((node, index) => {
+      // 현재 노드의 경로와 이전 경로 비교
+      const currentPath = node.path;
+      const prevPath = index > 0 ? nodes[index - 1].path : [];
+      
+      // 닫아야 할 태그들 찾기
+      let closeCount = 0;
+      for (let i = Math.min(openTags.length, prevPath.length) - 1; i >= 0; i--) {
+        if (i >= currentPath.length || 
+            openTags[i].tag !== currentPath[i].tag ||
+            JSON.stringify(openTags[i].attributes) !== JSON.stringify(currentPath[i].attributes)) {
+          closeCount = openTags.length - i;
+          break;
+        }
+      }
+      
+      // 태그 닫기
+      for (let i = 0; i < closeCount; i++) {
+        const tagToClose = openTags.pop();
+        html += `</${tagToClose.tag}>`;
+      }
+      
+      // 열어야 할 태그들 찾기
+      for (let i = openTags.length; i < currentPath.length; i++) {
+        const tagInfo = currentPath[i];
+        const attributes = Object.entries(tagInfo.attributes)
+          .map(([key, value]) => `${key}="${value}"`)
+          .join(' ');
+        
+        html += `<${tagInfo.tag}${attributes ? ' ' + attributes : ''}>`;
+        openTags.push(tagInfo);
+      }
+      
+      // 텍스트 추가
+      html += node.char;
+    });
+    
+    // 남은 태그들 모두 닫기
+    while (openTags.length > 0) {
+      const tagToClose = openTags.pop();
+      html += `</${tagToClose.tag}>`;
+    }
+    
+    return html;
+  };
 
   return (
     <div>
-      {displayedText}
+      <span dangerouslySetInnerHTML={{ __html: displayedHTML }} />
       {isTyping && (
         <span
           style={{
