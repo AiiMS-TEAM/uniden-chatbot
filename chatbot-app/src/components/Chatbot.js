@@ -349,7 +349,7 @@ const Chatbot = () => {
         requestData.thread_id = threadId;
       }
 
-      const response = await axios.post('http://localhost:5001/api/query', requestData, {
+      const response = await axios.post('https://innovate.aiims.com.au/api/query', requestData, {
         headers: {
           'Content-Type': 'application/json'
         }
