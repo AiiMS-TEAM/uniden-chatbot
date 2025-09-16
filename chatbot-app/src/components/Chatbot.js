@@ -49,146 +49,66 @@ const parseMarkdown = (text) => {
   return parsed;
 };
 
-// 타이핑 애니메이션 컴포넌트 (HTML 기반)
-const TypewriterText = ({ text, speed = 20, onComplete, onUpdate }) => {
-  const [displayedHTML, setDisplayedHTML] = useState('');
+// 간단하고 효율적인 타이핑 애니메이션 컴포넌트
+const TypewriterText = ({ text, speed = 30, onComplete, onUpdate }) => {
+  const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
-  const [textNodes, setTextNodes] = useState([]);
 
-  // 초기화: HTML을 파싱하여 텍스트 노드들 추출
   useEffect(() => {
     if (!text) return;
     
-    const parsedHTML = parseMarkdown(text);
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = parsedHTML;
-    
-    const extractTextNodes = (element, path = []) => {
-      const nodes = [];
-      
-      for (let i = 0; i < element.childNodes.length; i++) {
-        const node = element.childNodes[i];
-        
-        if (node.nodeType === Node.TEXT_NODE) {
-          // 텍스트 노드인 경우, 각 글자를 개별 노드로 분리
-          const textContent = node.textContent;
-          for (let j = 0; j < textContent.length; j++) {
-            nodes.push({
-              type: 'text',
-              char: textContent[j],
-              path: [...path],
-              elementTag: path.length > 0 ? path[path.length - 1] : null
-            });
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          // 엘리먼트 노드인 경우, 재귀적으로 탐색
-          const elementInfo = {
-            tag: node.tagName.toLowerCase(),
-            attributes: {}
-          };
-          
-          // 속성 복사
-          for (let attr of node.attributes) {
-            elementInfo.attributes[attr.name] = attr.value;
-          }
-          
-          const childNodes = extractTextNodes(node, [...path, elementInfo]);
-          nodes.push(...childNodes);
-        }
-      }
-      
-      return nodes;
-    };
-    
-    const nodes = extractTextNodes(tempDiv);
-    setTextNodes(nodes);
+    setDisplayedText('');
+    setCurrentIndex(0);
+    setIsTyping(true);
   }, [text]);
 
-  // 타이핑 애니메이션
   useEffect(() => {
-    if (textNodes.length === 0) return;
-    
-    if (currentIndex < textNodes.length) {
-      const timer = setTimeout(() => {
-        // 현재까지의 노드들로 HTML 구성
-        const currentNodes = textNodes.slice(0, currentIndex + 1);
-        const html = buildHTML(currentNodes);
-        setDisplayedHTML(html);
-        setCurrentIndex(prev => prev + 1);
-        
-        // 타이핑 중 스크롤 업데이트 콜백 호출
-        onUpdate?.();
-      }, speed);
-
-      return () => clearTimeout(timer);
-    } else if (isTyping) {
-      setIsTyping(false);
-      onComplete?.();
+    if (!text || currentIndex >= text.length) {
+      if (isTyping) {
+        setIsTyping(false);
+        onComplete?.();
+      }
+      return;
     }
-  }, [currentIndex, textNodes, speed, isTyping, onComplete, onUpdate]);
 
-  const buildHTML = (nodes) => {
-    if (nodes.length === 0) return '';
+    const timer = setTimeout(() => {
+      setDisplayedText(text.substring(0, currentIndex + 1));
+      setCurrentIndex(prev => prev + 1);
+      onUpdate?.();
+    }, speed);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, text, speed, onComplete, onUpdate, isTyping]);
+
+  // 실시간으로 포맷팅 적용
+  const formatText = (text) => {
+    if (!text) return '';
     
-    let html = '';
-    let openTags = [];
+    // 개행 문자를 <br>로 변환
+    let formatted = text.replace(/\n/g, '<br>');
     
-    nodes.forEach((node, index) => {
-      // 현재 노드의 경로와 이전 경로 비교
-      const currentPath = node.path;
-      const prevPath = index > 0 ? nodes[index - 1].path : [];
-      
-      // 닫아야 할 태그들 찾기
-      let closeCount = 0;
-      for (let i = Math.min(openTags.length, prevPath.length) - 1; i >= 0; i--) {
-        if (i >= currentPath.length || 
-            openTags[i].tag !== currentPath[i].tag ||
-            JSON.stringify(openTags[i].attributes) !== JSON.stringify(currentPath[i].attributes)) {
-          closeCount = openTags.length - i;
-          break;
-        }
-      }
-      
-      // 태그 닫기
-      for (let i = 0; i < closeCount; i++) {
-        const tagToClose = openTags.pop();
-        html += `</${tagToClose.tag}>`;
-      }
-      
-      // 열어야 할 태그들 찾기
-      for (let i = openTags.length; i < currentPath.length; i++) {
-        const tagInfo = currentPath[i];
-        const attributes = Object.entries(tagInfo.attributes)
-          .map(([key, value]) => `${key}="${value}"`)
-          .join(' ');
-        
-        html += `<${tagInfo.tag}${attributes ? ' ' + attributes : ''}>`;
-        openTags.push(tagInfo);
-      }
-      
-      // 텍스트 추가
-      html += node.char;
-    });
+    // 볼드 텍스트 처리 (**text** -> <strong>text</strong>)
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
-    // 남은 태그들 모두 닫기
-    while (openTags.length > 0) {
-      const tagToClose = openTags.pop();
-      html += `</${tagToClose.tag}>`;
-    }
+    // 이탤릭 텍스트 처리 (*text* -> <em>text</em>)
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
-    return html;
+    // 인라인 코드 처리 (`code` -> <code>code</code>)
+    formatted = formatted.replace(/`(.*?)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; font-family: monospace;">$1</code>');
+    
+    return formatted;
   };
 
   return (
-    <div>
-      <span dangerouslySetInnerHTML={{ __html: displayedHTML }} />
+    <div style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', lineHeight: '1.5' }}>
+      <span dangerouslySetInnerHTML={{ __html: formatText(displayedText) }} />
       {isTyping && (
         <span
           style={{
             display: 'inline-block',
             width: '2px',
-            height: '1em',
+            height: '1.2em',
             backgroundColor: 'currentColor',
             marginLeft: '2px',
             animation: 'blink 1s infinite'
