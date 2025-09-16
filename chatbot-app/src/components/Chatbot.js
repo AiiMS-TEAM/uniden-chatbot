@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Send, Bot, User, Loader2, RotateCcw } from 'lucide-react';
+import { Send, Bot, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 // 쿠키 관리 유틸리티 함수들
@@ -21,9 +21,6 @@ const getCookie = (name) => {
   return null;
 };
 
-const deleteCookie = (name) => {
-  document.cookie = `${name}=; Max-Age=-99999999; path=/`;
-};
 
 // 마크다운을 HTML로 변환하는 간단한 파서
 const parseMarkdown = (text) => {
@@ -219,11 +216,65 @@ const ChatContainer = styled.div`
   flex-direction: column;
   height: 600px;
   width: 400px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.12),
+    0 16px 32px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.04);
+  background: linear-gradient(145deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  position: relative;
+  
+  /* 글래스모피즘 효과를 위한 오버레이 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* 반응형 디자인 */
+  @media (max-width: 480px) {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+  @media (max-width: 768px) {
+    width: calc(100vw - 40px);
+    height: 80vh;
+    border-radius: 20px;
+  }
+  
+  /* 다크모드 지원 */
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 
+      0 32px 64px rgba(0, 0, 0, 0.3),
+      0 16px 32px rgba(0, 0, 0, 0.2),
+      0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 모션 감소 설정 지원 */
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
   
   /* 커서 깜빡임 애니메이션 */
   @keyframes blink {
@@ -233,123 +284,162 @@ const ChatContainer = styled.div`
 `;
 
 const Header = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  padding: 24px 20px;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   position: relative;
+  z-index: 2;
+  
+  /* 헤더 상단 하이라이트 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
+  }
 `;
 
 const Title = styled.h1`
   color: white;
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 26px;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.02em;
+  background: linear-gradient(145deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const Subtitle = styled.p`
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   margin: 8px 0 0 0;
   font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 `;
 
-const NewChatButton = styled.button`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 35px;
-  height: 35px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-  }
-  
-  &:active {
-    transform: scale(0.95);
-  }
-`;
 
 const MessagesContainer = styled.div`
   flex: 1;
-  padding: 20px;
+  padding: 24px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
   
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   
   &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
   }
   
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
   }
 `;
 
 const Message = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   ${props => props.isUser ? 'flex-direction: row-reverse;' : ''}
+  animation: messageSlideIn 0.3s ease-out;
+  
+  @keyframes messageSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 
 const MessageAvatar = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: ${props => props.isUser 
-    ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' 
-    : 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
+    : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
   };
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 12px 24px rgba(0, 0, 0, 0.15),
+      0 6px 12px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
 `;
 
 const MessageContent = styled.div`
   max-width: 80%;
-  padding: 16px 20px;
-  border-radius: 20px;
+  padding: 18px 22px;
+  border-radius: ${props => props.isUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px'};
   background: ${props => props.isUser 
-    ? 'rgba(255, 255, 255, 0.9)' 
-    : 'rgba(255, 255, 255, 0.15)'
+    ? 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)' 
+    : 'linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%)'
   };
-  backdrop-filter: blur(10px);
-  color: ${props => props.isUser ? '#333' : 'white'};
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  color: ${props => props.isUser ? '#1f2937' : 'white'};
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, ${props => props.isUser ? '0.6' : '0.2'});
   word-wrap: break-word;
   line-height: 1.6;
+  border: 1px solid ${props => props.isUser ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
+  position: relative;
+  transition: all 0.2s ease;
   
-  ${props => props.isUser ? `
-    border-bottom-right-radius: 6px;
-  ` : `
-    border-bottom-left-radius: 6px;
-  `}
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.12),
+      0 6px 20px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, ${props => props.isUser ? '0.7' : '0.3'});
+  }
   
   /* 포맷팅된 텍스트 스타일 */
   & strong {
-    font-weight: 600;
-    color: ${props => props.isUser ? '#1a1a1a' : '#fff'};
+    font-weight: 700;
+    color: ${props => props.isUser ? '#111827' : '#fff'};
   }
   
   & em {
@@ -358,12 +448,13 @@ const MessageContent = styled.div`
   }
   
   & code {
-    background-color: ${props => props.isUser ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
-    padding: 2px 6px;
-    border-radius: 4px;
+    background-color: ${props => props.isUser ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.15)'};
+    padding: 3px 8px;
+    border-radius: 6px;
     font-size: 0.9em;
-    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
-    color: ${props => props.isUser ? '#e83e8c' : '#ffd700'};
+    font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+    color: ${props => props.isUser ? '#dc2626' : '#fbbf24'};
+    border: 1px solid ${props => props.isUser ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'};
   }
   
   & p {
@@ -382,16 +473,58 @@ const MessageContent = styled.div`
 const LoadingMessage = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.85);
   font-style: italic;
+  font-weight: 500;
+  
+  /* \ub85c\ub529 \uc810\uc810\uc810 \uc560\ub2c8\uba54\uc774\uc158 */
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: loadingDots 1.4s infinite ease-in-out;
+    margin-left: 4px;
+  }
+  
+  @keyframes loadingDots {
+    0%, 80%, 100% {
+      transform: scale(0);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 `;
 
 const InputContainer = styled.div`
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+  z-index: 2;
+  
+  /* 하단 하이라이트 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
+  }
 `;
 
 const InputWrapper = styled.div`
@@ -402,51 +535,78 @@ const InputWrapper = styled.div`
 
 const Input = styled.input`
   flex: 1;
-  padding: 16px 20px;
+  padding: 18px 24px;
   border: none;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+  color: #1f2937;
   font-size: 16px;
+  font-weight: 500;
   outline: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
+    font-weight: 400;
   }
   
   &:focus {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  }
-`;
-
-const SendButton = styled.button`
-  width: 50px;
-  height: 50px;
-  border: none;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-  }
-  
-  &:active {
-    transform: translateY(0);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.12),
+      0 6px 20px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      0 0 0 3px rgba(99, 102, 241, 0.1);
+    transform: translateY(-1px);
   }
   
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+`;
+
+const SendButton = styled.button`
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.3),
+    0 4px 16px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+      0 12px 40px rgba(59, 130, 246, 0.4),
+      0 6px 20px rgba(59, 130, 246, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
     transform: none;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.05);
   }
 `;
 
@@ -586,30 +746,10 @@ const Chatbot = () => {
     }, 50); // 50ms throttle
   };
 
-  const startNewChat = () => {
-    // 쿠키에서 thread_id 삭제
-    deleteCookie('uniden_chatbot_thread_id');
-    setThreadId('');
-    
-    // 메시지 초기화
-    setMessages([
-      {
-        id: 1,
-        text: "Hello! I'm your Uniden product support assistant. Feel free to ask me anything about our products. For example, you can ask about 'camera installation' or 'product information'.",
-        isUser: false,
-        timestamp: new Date(),
-        typing: false,
-        isComplete: true
-      }
-    ]);
-  };
 
   return (
     <ChatContainer>
       <Header>
-        <NewChatButton onClick={startNewChat} title="Start new conversation">
-          <RotateCcw size={18} />
-        </NewChatButton>
         <Title>Uniden Assistant</Title>
         <Subtitle>AI-powered product support</Subtitle>
       </Header>
@@ -658,7 +798,12 @@ const Chatbot = () => {
             placeholder="Type your message..."
             disabled={isLoading}
           />
-          <SendButton onClick={sendMessage} disabled={isLoading || !inputValue.trim()}>
+          <SendButton 
+            onClick={sendMessage} 
+            disabled={isLoading || !inputValue.trim()}
+            title="메시지 전송"
+            aria-label="메시지 전송"
+          >
             <Send size={20} />
           </SendButton>
         </InputWrapper>

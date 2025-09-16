@@ -12,28 +12,35 @@ const FloatingContainer = styled.div`
 `;
 
 const ChatButton = styled.button`
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 
+    0 16px 32px rgba(99, 102, 241, 0.3),
+    0 8px 16px rgba(139, 92, 246, 0.2),
+    0 4px 8px rgba(236, 72, 153, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+      0 20px 40px rgba(99, 102, 241, 0.4),
+      0 12px 24px rgba(139, 92, 246, 0.3),
+      0 6px 12px rgba(236, 72, 153, 0.2);
   }
   
   &:active {
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.02);
   }
   
   &::before {
@@ -43,7 +50,12 @@ const ChatButton = styled.button`
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    background: linear-gradient(
+      135deg, 
+      rgba(255, 255, 255, 0.2) 0%, 
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -56,23 +68,30 @@ const ChatButton = styled.button`
 
 const ChatWindow = styled.div`
   position: absolute;
-  bottom: 80px;
+  bottom: 84px;
   right: 0;
   width: 400px;
   height: 600px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 24px;
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.2),
+    0 16px 32px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.05);
   background: white;
   overflow: hidden;
-  transform: ${props => props.isOpen ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(20px)'};
+  transform: ${props => props.isOpen ? 'scale(1) translateY(0)' : 'scale(0.85) translateY(24px)'};
   opacity: ${props => props.isOpen ? '1' : '0'};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* 배경 블러 효과 */
+  backdrop-filter: blur(20px);
   
   @media (max-width: 480px) {
     width: calc(100vw - 40px);
     right: -20px;
-    bottom: 80px;
+    bottom: 84px;
   }
 `;
 
@@ -80,42 +99,51 @@ const CloseButton = styled.button`
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
   color: #666;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 1000;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
   
   &:hover {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 1);
     color: #333;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
 const PulseAnimation = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  animation: pulse 2s infinite;
+  background: linear-gradient(145deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  animation: pulse 2.5s ease-in-out infinite;
+  z-index: -1;
   
   @keyframes pulse {
-    0% {
+    0%, 100% {
       transform: scale(1);
-      opacity: 1;
+      opacity: 0.8;
     }
-    100% {
-      transform: scale(1.4);
+    50% {
+      transform: scale(1.3);
       opacity: 0;
     }
   }
@@ -130,13 +158,22 @@ const FloatingChatbot = () => {
 
   return (
     <FloatingContainer>
-      <ChatButton onClick={toggleChat}>
+      <ChatButton 
+        onClick={toggleChat}
+        title={isOpen ? "챗봇 닫기" : "챗봇 열기"}
+        aria-label={isOpen ? "챗봇 닫기" : "챗봇 열기"}
+        aria-expanded={isOpen}
+      >
         {!isOpen && <PulseAnimation />}
         {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
       </ChatButton>
       
       <ChatWindow isOpen={isOpen}>
-        <CloseButton onClick={toggleChat}>
+        <CloseButton 
+          onClick={toggleChat}
+          title="챗봇 닫기"
+          aria-label="챗봇 닫기"
+        >
           <X size={16} />
         </CloseButton>
         <Chatbot />
