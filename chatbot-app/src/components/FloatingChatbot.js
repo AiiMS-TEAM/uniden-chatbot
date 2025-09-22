@@ -5,7 +5,7 @@ import Chatbot from './Chatbot';
 
 const FloatingContainer = styled.div`
   position: fixed;
-  bottom: 20px;
+  bottom: 70px;
   right: 20px;
   z-index: 1000;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -171,22 +171,35 @@ const FloatingChatbot = () => {
     setIsOpen(!isOpen);
   };
 
-  // 모바일에서 챗봇이 열렸을 때 배경 스크롤 방지
+  // 모바일에서 챗봇이 열렸을 때만 배경 스크롤 방지
   React.useEffect(() => {
-    if (isOpen && window.innerWidth <= 480) {
-      document.body.style.overflow = 'hidden';
+    const isMobile = window.innerWidth <= 480;
+    
+    if (isOpen && isMobile) {
+      // 현재 스크롤 위치 저장
+      const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = '';
+      // 스크롤 위치 복원
+      const scrollY = document.body.style.top;
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
 
     return () => {
-      document.body.style.overflow = '';
+      // 컴포넌트 언마운트 시 정리
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
 
