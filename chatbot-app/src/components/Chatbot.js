@@ -168,6 +168,7 @@ const ChatContainer = styled.div`
   @media (max-width: 480px) {
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* 동적 뷰포트 높이 */
     border-radius: 0;
     max-width: none;
     max-height: none;

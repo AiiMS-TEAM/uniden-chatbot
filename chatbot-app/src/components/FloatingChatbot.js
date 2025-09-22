@@ -96,8 +96,10 @@ const ChatWindow = styled.div`
     bottom: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* 동적 뷰포트 높이 */
     border-radius: 0;
     transform: ${props => props.isOpen ? 'scale(1) translateY(0)' : 'scale(1) translateY(100%)'};
+    z-index: 9999;
   }
   
   @media (max-width: 768px) and (min-width: 481px) {
@@ -168,6 +170,25 @@ const FloatingChatbot = () => {
   const toggleChat = () => {
     setIsOpen(!isOpen);
   };
+
+  // 모바일에서 챗봇이 열렸을 때 배경 스크롤 방지
+  React.useEffect(() => {
+    if (isOpen && window.innerWidth <= 480) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isOpen]);
 
   return (
     <FloatingContainer>
