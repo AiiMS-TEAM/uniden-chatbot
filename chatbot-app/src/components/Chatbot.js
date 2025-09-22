@@ -166,14 +166,16 @@ const ChatContainer = styled.div`
   
   /* 반응형 디자인 */
   @media (max-width: 480px) {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     border-radius: 0;
+    max-width: none;
+    max-height: none;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 768px) and (min-width: 481px) {
     width: calc(100vw - 40px);
-    height: 80vh;
+    height: calc(100vh - 120px);
     border-radius: 20px;
   }
   

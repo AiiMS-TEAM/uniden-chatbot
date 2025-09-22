@@ -89,7 +89,20 @@ const ChatWindow = styled.div`
   backdrop-filter: blur(20px);
   
   @media (max-width: 480px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    transform: ${props => props.isOpen ? 'scale(1) translateY(0)' : 'scale(1) translateY(100%)'};
+  }
+  
+  @media (max-width: 768px) and (min-width: 481px) {
     width: calc(100vw - 40px);
+    height: calc(100vh - 120px);
     right: -20px;
     bottom: 84px;
   }
