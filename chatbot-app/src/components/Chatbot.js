@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 // 쿠키 관리 유틸리티 함수들
@@ -312,7 +312,7 @@ const MessageAvatar = styled.div`
   justify-content: center;
   background: ${props => props.isUser 
     ? 'linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%)' 
-    : 'linear-gradient(135deg, #6a6a6a 0%, #4a4a4a 100%)'
+    : `url('https://cdn.shopify.com/s/files/1/0937/4495/5688/files/495563014_1093200439506807_4432333074431351127_n.jpg?v=1758087167') center/cover`
   };
   box-shadow: 
     0 8px 16px rgba(0, 0, 0, 0.3),
@@ -681,7 +681,7 @@ const Chatbot = () => {
         {messages.map((message) => (
           <Message key={message.id} isUser={message.isUser}>
             <MessageAvatar isUser={message.isUser}>
-              {message.isUser ? <User size={20} /> : <Bot size={20} />}
+              {message.isUser && <User size={20} />}
             </MessageAvatar>
             <MessageContent isUser={message.isUser}>
               <FormattedText 
@@ -696,8 +696,7 @@ const Chatbot = () => {
         
         {isLoading && (
           <Message>
-            <MessageAvatar>
-              <Bot size={20} />
+            <MessageAvatar isUser={false}>
             </MessageAvatar>
             <MessageContent>
               <LoadingMessage>
