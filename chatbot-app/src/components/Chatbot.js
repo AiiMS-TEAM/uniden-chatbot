@@ -138,10 +138,10 @@ const ChatContainer = styled.div`
   width: 400px;
   border-radius: 24px;
   box-shadow: 
-    0 32px 64px rgba(0, 0, 0, 0.12),
-    0 16px 32px rgba(0, 0, 0, 0.08),
-    0 8px 16px rgba(0, 0, 0, 0.04);
-  background: linear-gradient(145deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    0 32px 64px rgba(0, 0, 0, 0.3),
+    0 16px 32px rgba(0, 0, 0, 0.2),
+    0 8px 16px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 50%, #000000 100%);
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   position: relative;
@@ -156,9 +156,9 @@ const ChatContainer = styled.div`
     bottom: 0;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0.02) 100%
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.01) 100%
     );
     pointer-events: none;
     z-index: 1;
@@ -207,11 +207,11 @@ const ChatContainer = styled.div`
 `;
 
 const Header = styled.div`
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   padding: 24px 20px;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 2;
   
@@ -237,16 +237,16 @@ const Title = styled.h1`
   margin: 0;
   font-size: 26px;
   font-weight: 700;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   letter-spacing: -0.02em;
-  background: linear-gradient(145deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  background: linear-gradient(145deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 `;
 
 const Subtitle = styled.p`
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
   margin: 8px 0 0 0;
   font-size: 14px;
   font-weight: 500;
@@ -274,13 +274,13 @@ const MessagesContainer = styled.div`
   }
   
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
     border-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   &::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
   }
 `;
 
@@ -311,13 +311,13 @@ const MessageAvatar = styled.div`
   align-items: center;
   justify-content: center;
   background: ${props => props.isUser 
-    ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
-    : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+    ? 'linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%)' 
+    : 'linear-gradient(135deg, #6a6a6a 0%, #4a4a4a 100%)'
   };
   box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.12),
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
   border: 2px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
@@ -325,9 +325,9 @@ const MessageAvatar = styled.div`
   &:hover {
     transform: scale(1.05);
     box-shadow: 
-      0 12px 24px rgba(0, 0, 0, 0.15),
-      0 6px 12px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      0 12px 24px rgba(0, 0, 0, 0.4),
+      0 6px 12px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 `;
 
@@ -337,14 +337,14 @@ const MessageContent = styled.div`
   border-radius: ${props => props.isUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px'};
   background: ${props => props.isUser 
     ? 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)' 
-    : 'linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%)'
+    : 'linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)'
   };
   backdrop-filter: blur(20px);
   color: ${props => props.isUser ? '#1f2937' : 'white'};
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 4px 16px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, ${props => props.isUser ? '0.6' : '0.2'});
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, ${props => props.isUser ? '0.6' : '0.1'});
   word-wrap: break-word;
   line-height: 1.6;
   border: 1px solid ${props => props.isUser ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
@@ -354,9 +354,9 @@ const MessageContent = styled.div`
   &:hover {
     transform: translateY(-1px);
     box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.12),
-      0 6px 20px rgba(0, 0, 0, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, ${props => props.isUser ? '0.7' : '0.3'});
+      0 12px 40px rgba(0, 0, 0, 0.25),
+      0 6px 20px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, ${props => props.isUser ? '0.7' : '0.2'});
   }
   
   /* 포맷팅된 텍스트 스타일 */
@@ -371,12 +371,12 @@ const MessageContent = styled.div`
   }
   
   & code {
-    background-color: ${props => props.isUser ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.15)'};
+    background-color: ${props => props.isUser ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)'};
     padding: 3px 8px;
     border-radius: 6px;
     font-size: 0.9em;
     font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
-    color: ${props => props.isUser ? '#dc2626' : '#fbbf24'};
+    color: ${props => props.isUser ? '#dc2626' : '#ffffff'};
     border: 1px solid ${props => props.isUser ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'};
   }
   
@@ -397,7 +397,7 @@ const LoadingMessage = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
   font-style: italic;
   font-weight: 500;
   
@@ -427,9 +427,9 @@ const LoadingMessage = styled.div`
 
 const InputContainer = styled.div`
   padding: 24px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 2;
   
@@ -467,8 +467,8 @@ const Input = styled.input`
   font-weight: 500;
   outline: none;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all 0.2s ease;
@@ -480,10 +480,10 @@ const Input = styled.input`
   
   &:focus {
     box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.12),
-      0 6px 20px rgba(0, 0, 0, 0.06),
+      0 12px 40px rgba(0, 0, 0, 0.25),
+      0 6px 20px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      0 0 0 3px rgba(99, 102, 241, 0.1);
+      0 0 0 3px rgba(255, 255, 255, 0.1);
     transform: translateY(-1px);
   }
   
@@ -498,25 +498,25 @@ const SendButton = styled.button`
   height: 54px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.3),
-    0 4px 16px rgba(59, 130, 246, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
   border: 2px solid rgba(255, 255, 255, 0.1);
   
   &:hover {
     transform: translateY(-3px) scale(1.05);
     box-shadow: 
-      0 12px 40px rgba(59, 130, 246, 0.4),
-      0 6px 20px rgba(59, 130, 246, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      0 6px 20px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
   
   &:active {
@@ -724,8 +724,8 @@ const Chatbot = () => {
           <SendButton 
             onClick={sendMessage} 
             disabled={isLoading || !inputValue.trim()}
-            title="메시지 전송"
-            aria-label="메시지 전송"
+            title="Send Message"
+            aria-label="Send Message"
           >
             <Send size={20} />
           </SendButton>

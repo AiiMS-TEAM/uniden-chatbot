@@ -16,27 +16,27 @@ const ChatButton = styled.button`
   height: 64px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(145deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 50%, #000000 100%);
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    0 16px 32px rgba(99, 102, 241, 0.3),
-    0 8px 16px rgba(139, 92, 246, 0.2),
-    0 4px 8px rgba(236, 72, 153, 0.1);
+    0 16px 32px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   
   &:hover {
     transform: translateY(-4px) scale(1.05);
     box-shadow: 
-      0 20px 40px rgba(99, 102, 241, 0.4),
-      0 12px 24px rgba(139, 92, 246, 0.3),
-      0 6px 12px rgba(236, 72, 153, 0.2);
+      0 20px 40px rgba(0, 0, 0, 0.5),
+      0 12px 24px rgba(0, 0, 0, 0.4),
+      0 6px 12px rgba(0, 0, 0, 0.3);
   }
   
   &:active {
@@ -74,10 +74,10 @@ const ChatWindow = styled.div`
   height: 600px;
   border-radius: 24px;
   box-shadow: 
-    0 32px 64px rgba(0, 0, 0, 0.2),
-    0 16px 32px rgba(0, 0, 0, 0.1),
-    0 8px 16px rgba(0, 0, 0, 0.05);
-  background: white;
+    0 32px 64px rgba(0, 0, 0, 0.4),
+    0 16px 32px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  background: #1a1a1a;
   overflow: hidden;
   transform: ${props => props.isOpen ? 'scale(1) translateY(0)' : 'scale(0.85) translateY(24px)'};
   opacity: ${props => props.isOpen ? '1' : '0'};
@@ -118,22 +118,22 @@ const CloseButton = styled.button`
   height: 32px;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  color: #666;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   
   &:hover {
-    background: rgba(255, 255, 255, 1);
-    color: #333;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
   
   &:active {
@@ -148,7 +148,7 @@ const PulseAnimation = styled.div`
   right: -2px;
   bottom: -2px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 50%, #000000 100%);
   animation: pulse 2.5s ease-in-out infinite;
   z-index: -1;
   
@@ -207,8 +207,8 @@ const FloatingChatbot = () => {
     <FloatingContainer>
       <ChatButton 
         onClick={toggleChat}
-        title={isOpen ? "챗봇 닫기" : "챗봇 열기"}
-        aria-label={isOpen ? "챗봇 닫기" : "챗봇 열기"}
+        title={isOpen ? "Close Chatbot" : "Open Chatbot"}
+        aria-label={isOpen ? "Close Chatbot" : "Open Chatbot"}
         aria-expanded={isOpen}
       >
         {!isOpen && <PulseAnimation />}
@@ -218,8 +218,8 @@ const FloatingChatbot = () => {
       <ChatWindow isOpen={isOpen}>
         <CloseButton 
           onClick={toggleChat}
-          title="챗봇 닫기"
-          aria-label="챗봇 닫기"
+          title="Close Chatbot"
+          aria-label="Close Chatbot"
         >
           <X size={16} />
         </CloseButton>
