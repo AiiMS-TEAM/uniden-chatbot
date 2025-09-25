@@ -26,8 +26,11 @@ const getCookie = (name) => {
 const parseMarkdown = (text) => {
   if (!text) return '';
   
+  // 링크 처리 ([text](url) -> <a href="url" target="_blank" rel="noopener noreferrer">text</a>)
+  let parsed = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline; text-decoration-color: rgba(59, 130, 246, 0.3); transition: all 0.2s ease;">$1</a>');
+  
   // 볼드 텍스트 (**text** -> <strong>text</strong>)
-  let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  parsed = parsed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
   // 이탤릭 텍스트 (*text* -> <em>text</em>)
   parsed = parsed.replace(/\*(.*?)\*/g, '<em>$1</em>');
@@ -50,7 +53,7 @@ const parseMarkdown = (text) => {
 };
 
 // 간단하고 효율적인 타이핑 애니메이션 컴포넌트
-const TypewriterText = ({ text, speed = 30, onComplete, onUpdate }) => {
+const TypewriterText = ({ text, speed = 15, onComplete, onUpdate }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -85,8 +88,11 @@ const TypewriterText = ({ text, speed = 30, onComplete, onUpdate }) => {
   const formatText = (text) => {
     if (!text) return '';
     
+    // 링크 처리 ([text](url) -> <a href="url" target="_blank" rel="noopener noreferrer">text</a>)
+    let formatted = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline; text-decoration-color: rgba(59, 130, 246, 0.3); transition: all 0.2s ease;">$1</a>');
+    
     // 개행 문자를 <br>로 변환
-    let formatted = text.replace(/\n/g, '<br>');
+    formatted = formatted.replace(/\n/g, '<br>');
     
     // 볼드 텍스트 처리 (**text** -> <strong>text</strong>)
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -304,7 +310,7 @@ const Message = styled.div`
 `;
 
 const MessageAvatar = styled.div`
-  width: 44px;s
+  width: 44px;
   height: 44px;
   border-radius: 50%;
   display: flex !important;
@@ -390,6 +396,25 @@ const MessageContent = styled.div`
   
   & br {
     margin: 4px 0;
+  }
+  
+  /* 링크 스타일링 */
+  & a {
+    color: ${props => props.isUser ? '#2563eb' : '#60a5fa'};
+    text-decoration: underline;
+    text-decoration-color: ${props => props.isUser ? 'rgba(37, 99, 235, 0.3)' : 'rgba(96, 165, 250, 0.3)'};
+    transition: all 0.2s ease;
+    font-weight: 500;
+    
+    &:hover {
+      color: ${props => props.isUser ? '#1d4ed8' : '#93c5fd'};
+      text-decoration-color: ${props => props.isUser ? 'rgba(29, 78, 216, 0.6)' : 'rgba(147, 197, 253, 0.6)'};
+      text-decoration-thickness: 2px;
+    }
+    
+    &:active {
+      color: ${props => props.isUser ? '#1e40af' : '#dbeafe'};
+    }
   }
 `;
 
