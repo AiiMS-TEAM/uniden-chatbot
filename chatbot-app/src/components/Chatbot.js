@@ -304,15 +304,15 @@ const Message = styled.div`
 `;
 
 const MessageAvatar = styled.div`
-  width: 44px;
+  width: 44px;s
   height: 44px;
   border-radius: 50%;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   background: ${props => props.isUser 
     ? 'linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%)' 
-    : `url('https://cdn.shopify.com/s/files/1/0937/4495/5688/files/495563014_1093200439506807_4432333074431351127_n.jpg?v=1758087167') center/cover`
+    : `url('https://cdn.shopify.com/s/files/1/0937/4495/5688/files/uniden_7323aa84-2cf7-4b4e-aaf3-ae10e2ec538d.jpg?v=1758696947') center/cover`
   };
   box-shadow: 
     0 8px 16px rgba(0, 0, 0, 0.3),
